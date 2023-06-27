@@ -1,0 +1,17 @@
+query AdminAppointments {
+  appointments {
+    id
+    student {
+      id
+      name
+    }
+    faculty {
+      id
+      name
+    }
+    course {
+      id
+      name
+    }
+  }
+}

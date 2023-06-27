@@ -1,0 +1,41 @@
+{
+  "name": "app",
+  "private": "true",
+  "dependencies": {
+    "@apollo/client": "^3.7.16",
+    "@fortawesome/fontawesome-svg-core": "^6.4.0",
+    "@fortawesome/free-solid-svg-icons": "^6.4.0",
+    "@fortawesome/react-fontawesome": "^0.2.0",
+    "@fullstory/browser": "^1.7.1",
+    "@graphql-codegen/cli": "^4.0.1",
+    "@graphql-codegen/client-preset": "^4.0.1",
+    "@graphql-codegen/typescript-react-apollo": "^3.3.7",
+    "@sentry/react": "^7.57.0",
+    "@types/node": "^20.3.2",
+    "@types/react": "^18.2.14",
+    "@types/react-dom": "^18.2.6",
+    "@typescript-eslint/eslint-plugin": "^5.60.1",
+    "@typescript-eslint/parser": "^5.60.1",
+    "bulma": "^0.9.4",
+    "date-fns": "^2.30.0",
+    "esbuild": "^0.18.10",
+    "eslint": "^8.43.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "graphql": "^16.7.1",
+    "graphql-tag": "^2.12.6",
+    "prettier": "^2.8.8",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.14.0",
+    "tights": "^3.9.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.6"
+  },
+  "scripts": {
+    "build": "esbuild app/packs/entrypoints/*.* --bundle --minify --sourcemap --jsx=automatic --outdir=app/assets/builds",
+    "codegen": "graphql-codegen",
+    "lint": "eslint app/packs && prettier --check app/packs"
+  }
+}

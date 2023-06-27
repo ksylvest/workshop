@@ -1,0 +1,6 @@
+query AdminUsers {
+  users {
+    id
+    name
+  }
+}

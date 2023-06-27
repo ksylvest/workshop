@@ -1,0 +1,11 @@
+mutation Logout {
+  logout {
+    authentication {
+      id
+      user {
+        id
+        name
+      }
+    }
+  }
+}

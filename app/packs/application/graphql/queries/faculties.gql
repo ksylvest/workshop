@@ -1,0 +1,6 @@
+query Faculties {
+  faculties {
+    id
+    name
+  }
+}

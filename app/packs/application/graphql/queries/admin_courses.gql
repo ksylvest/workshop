@@ -1,0 +1,6 @@
+query AdminCourses {
+  courses {
+    id
+    name
+  }
+}

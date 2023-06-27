@@ -1,0 +1,118 @@
+version: 2.1
+orbs:
+  browser-tools: circleci/browser-tools@1.4.1
+  node: circleci/node@5.1.0
+  ruby: circleci/ruby@2.0.1
+
+executors:
+  default:
+    docker:
+      - image: cimg/ruby:3.2.2-browsers
+      - image: cimg/postgres:15.3
+        environment:
+          POSTGRES_USER: circleci
+          POSTGRES_DB: workshop_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+    environment:
+      RAILS_ENV: test
+      RACK_ENV: test
+      PGHOST: localhost
+
+commands:
+  setup_ruby:
+    steps:
+      - ruby/install-deps
+  setup_node:
+    steps:
+      - node/install-packages:
+          pkg-manager: yarn
+
+jobs:
+  eslint:
+    executor: default
+    steps:
+      - checkout
+      - setup_node
+      - run: yarn eslint app/packs
+
+  prettier:
+    executor: default
+    steps:
+      - checkout
+      - setup_node
+      - run: yarn prettier --check app/packs
+
+  tsc:
+    executor: default
+    steps:
+      - checkout
+      - setup_node
+      - run: yarn tsc --pretty --strict --noemit --skiplibcheck
+
+  rubocop:
+    executor: default
+    steps:
+      - checkout
+      - setup_ruby
+      - ruby/rubocop-check
+
+  brakeman:
+    executor: default
+    steps:
+      - checkout
+      - setup_ruby
+      - run: bundle exec brakeman -z --format html --output tmp/brakeman.html
+      - store_artifacts:
+          path: tmp/brakeman.html
+          destination: brakeman.html
+
+  rspec:
+    executor: default
+    steps:
+      - checkout
+      - run: sudo apt-get update
+      - run: sudo apt-get install libvips
+      - browser-tools/install-chrome
+      - browser-tools/install-chromedriver
+      - setup_ruby
+      - setup_node
+      - run: dockerize -wait tcp://localhost:5432 -timeout 2m # Postgres
+      - run: ./bin/rails test:prepare
+      - ruby/rspec-test
+
+  codegen:
+    executor: default
+    steps:
+      - checkout
+      - setup_ruby
+      - setup_node
+      - run: bundle exec rake graphql:schema:generate
+      - run: yarn run codegen
+      - run: |
+          if [[ $(git diff app/graphql/app_schema.graphql app/packs/application/graphql/app_schema.ts) ]]; then
+            echo '`bundle exec rake graphql:schema:generate`'
+            echo '`yarn run codegen`'
+            git diff app/graphql/app_schema.graphql app/packs/application/graphql/app_schema.ts
+            exit 1
+          fi
+
+  assets:
+    executor: default
+    steps:
+      - checkout
+      - setup_ruby
+      - setup_node
+      - run: ./bin/rails assets:precompile
+
+workflows:
+  version: 2.1
+  build:
+    jobs:
+      - assets
+      - brakeman
+      - codegen
+      - eslint
+      - prettier
+      - rspec
+      - rubocop
+      - tsc
